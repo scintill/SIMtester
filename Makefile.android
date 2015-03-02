@@ -1,6 +1,11 @@
-run: simtester-android.jar
-	adb shell "echo 'cd /data/local/tmp/simtester; env ANDROID_DATA=/data/local/tmp/simtester CLASSPATH=/data/local/tmp/simtester/simtester-android.jar app_process /data/local/tmp/simtester de.srlabs.simtester.Main' | su nfc"
-
 simtester-android.jar: SIMTester/dist/SIMTester.jar SIMTester/lib/commons-cli-1.2.jar SIMLibrary/dist/SIMLibrary.jar SIMLibrary-Android/dist/SIMLibrary-Android.jar
 	/opt/android-sdk-linux/build-tools/19.1.0/dx --dex --output=$@ $^
 	adb push $@ /data/local/tmp/simtester/
+
+run: simtester-android.jar
+	adb shell "echo 'cd /data/local/tmp/simtester; env ANDROID_DATA=/data/local/tmp/simtester CLASSPATH=/data/local/tmp/simtester/simtester-android.jar app_process /data/local/tmp/simtester de.srlabs.simtester.Main' | su nfc"
+
+phone-setup-once:
+	adb shell mkdir /data/local/tmp/simtester
+	adb shell mkdir /data/local/tmp/simtester/dalvik-cache
+	adb shell su -c "chown nfc.shell /data/local/tmp/simtester /data/local/tmp/simtester/dalvik-cache"
