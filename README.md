@@ -19,8 +19,10 @@ I'm not sure if I can or will pursue this further, but here are some ideas for d
 
 ## Implementation notes
 
-The basic code is in AndroidSIMTerminal.  I put in stubs of some Android private classes to compile against.  At runtime, the real classes are found.
+The basic code is in AndroidSIMTerminal.  I put in stubs of some Android/SEEK private classes to compile against.  At runtime, the real classes are found.
 
 Part of the `javax.smartcardio` API is implemented, since Android doesn't have it.  CommandAPDU implementation not included, because it looks kind of complicated, so I've just been testing with OpenJDK's GPL'd implementation.
 
-The application is run as the user "nfc", because on CM11 it has privileges to directly access the SIM.  The applicable user ID may be different on other builds.
+The application is run as the user `nfc`, because on CM11 that user is allowed to call the SEEK APIs in the telephony service.  The applicable user ID may be different on other builds.
+
+Some of this may be possible through the official SEEK service APK, which would be nice because root would not be required.  But I have not used it for a few reasons: a) My CyanogenMod phone doesn't have it, but does have the SEEK patches, b) There are access controls implemented in the service APK, which might get in the way.
