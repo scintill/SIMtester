@@ -48,6 +48,7 @@ public class Main {
     private static CSVWriter _writer = null;
 
     public static void main(String[] args) throws Exception {
+        if (IS_ANDROID) setupAndroid();
 
         System.out.println();
         System.out.println("########################################");
@@ -343,8 +344,11 @@ public class Main {
             case "OsmocomBB":
                 System.out.println("Using OsmocomBB mobile as SIM card reader");
                 return "OsmoTerminalFactory";
+            case "AndroidSEEK":
+                System.out.println("Using AndroidSEEK as SIM card reader");
+                return "AndroidSEEKTerminalFactory";
             default:
-                throw new IllegalArgumentException("Terminal factory (-tf) has to be either PCSC or OsmocomBB!");
+                throw new IllegalArgumentException("Terminal factory (-tf) has to be either PCSC, OsmocomBB, or AndroidSEEK!");
         }
     }
 
@@ -364,7 +368,7 @@ public class Main {
         options.addOption("vp", "verify-pin", true, "Verifies the PIN1/CHV1");
         options.addOption("dp", "disable-pin", true, "Disabled the PIN1/CHV1");
         options.addOption("ri", "reader-index", true, "SIM card reader index (PCSC), OsmocomBB only supports 1 reader (index=0, default)");
-        options.addOption("tf", "terminal-factory", true, "Terminal factory/type, either PCSC or OsmocomBB");
+        options.addOption("tf", "terminal-factory", true, "Terminal factory/type. PCSC, OsmocomBB, or AndroidSEEK");
         options.addOption("gsmmap", "gsmmap", false, "Automatically upload data to gsmmap.org");
         options.addOption(OptionBuilder.withLongOpt("tar").withDescription("TAR(s) to be tested, prefixed with a type, eg. 'RFM:B00010' or 'RAM:000000'").withValueSeparator(' ').hasArgs().withArgName("tar").create("t"));
         options.addOption(OptionBuilder.withLongOpt("keyset").withDescription("keyset(s) to be tested").withValueSeparator(' ').hasArgs().withArgName("keysets").create("k"));
@@ -396,7 +400,7 @@ public class Main {
                     ChannelHandler.getInstance(0, checkTerminalFactory(cmdline.getOptionValue("tf")));
                 }
             } else {
-                ChannelHandler.getInstance(0, checkTerminalFactory("PCSC")); // PCSC is default
+                ChannelHandler.getInstance(0, checkTerminalFactory(!IS_ANDROID ? "PCSC" : "AndroidSEEK"));
             }
 
             if (cmdline.hasOption("dp")) {
@@ -481,5 +485,25 @@ public class Main {
             }
         }
         return result;
+    }
+
+    public static final boolean IS_ANDROID = checkIsAndroid();
+
+    private static boolean checkIsAndroid() {
+        try {
+            Class.forName("android.os.Build");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private static void setupAndroid() {
+        Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable thrwbl) {
+                thrwbl.printStackTrace();
+            }
+        });
     }
 }

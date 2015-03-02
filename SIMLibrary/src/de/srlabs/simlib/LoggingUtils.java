@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 public class LoggingUtils {
 
-    private static Method m;
+    private static Method m = null;
 
     static {
         try {
@@ -15,13 +15,14 @@ public class LoggingUtils {
             e.printStackTrace(System.err);
         }
     }
-    
+
     public static String formatDebugMessage(String message) {
             String result = "[" + getClassName(1) + ", " + getMethodName(1) + "] " + message;
             return result;
     }
 
     private static String getMethodName(final int depth) {
+        if (m == null) return null;
         try {
             StackTraceElement element = (StackTraceElement) m.invoke(new Throwable(), depth + 1);
             return element.getMethodName();
@@ -32,6 +33,7 @@ public class LoggingUtils {
     }
 
     private static String getClassName(final int depth) {
+        if (m == null) return null;
         try {
             StackTraceElement element = (StackTraceElement) m.invoke(new Throwable(), depth + 1);
             return element.getClassName();
@@ -40,4 +42,5 @@ public class LoggingUtils {
             return null;
         }
     }
+
 }
